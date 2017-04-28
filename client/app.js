@@ -15,16 +15,21 @@ Vue.use(NProgress)
 Vue.config.devtools = true
 
 sync(store, router)
-
 const nprogress = new NProgress({ parent: '.nprogress-container' })
-
 const { state } = store
-
-router.beforeEach((route, redirect, next) => {
+router.beforeEach((to, from, next) => {
   if (state.app.device.isMobile && state.app.sidebar.opened) {
     store.commit(TOGGLE_SIDEBAR, false)
   }
-  next()
+  if (to.path === '/login') {
+    window.sessionStorage.removeItem('user')
+  }
+  let user = JSON.parse(window.sessionStorage.getItem('user'))
+  if (!user && to.path !== '/login') {
+    next({ path: '/login' })
+  } else {
+    next()
+  }
 })
 
 Object.keys(filters).forEach(key => {
